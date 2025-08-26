@@ -5,15 +5,16 @@ import java.util.concurrent.Callable;
 
 public class Main {
     public static void main(String[] args) throws InterruptedException {
-        TaskExecutorImpl taskExecutor = new TaskExecutorImpl(2);
+        TaskExecutorImpl taskExecutor = new TaskExecutorImpl(10);
         var g1 = new TaskGroup(UUID.randomUUID());
         var g2 = new TaskGroup(UUID.randomUUID());
+        var g3 = new TaskGroup(UUID.randomUUID());
         var f1 = taskExecutor.submitTask(new Task<>(UUID.randomUUID(), g1, TaskType.READ, new TestTask("t1")));
         var f2 = taskExecutor.submitTask(new Task<>(UUID.randomUUID(), g2, TaskType.READ, new TestTask("t2")));
         var f3 = taskExecutor.submitTask(new Task<>(UUID.randomUUID(), g1, TaskType.READ, new TestTask("t3")));
         var f4 = taskExecutor.submitTask(new Task<>(UUID.randomUUID(), g2, TaskType.READ, new TestTask("t4")));
         var f5 = taskExecutor.submitTask(new Task<>(UUID.randomUUID(), g1, TaskType.READ, new TestTask("t5")));
-        var f6 = taskExecutor.submitTask(new Task<>(UUID.randomUUID(), g2, TaskType.READ, new TestTask("t6")));
+        var f6 = taskExecutor.submitTask(new Task<>(UUID.randomUUID(), g3, TaskType.READ, new TestTask("t6")));
 
         Thread.sleep(6000);
 

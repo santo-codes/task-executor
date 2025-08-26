@@ -4,6 +4,9 @@ import java.util.Comparator;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 
+/**
+ * Assumption: Ordering is required only within a TaskGroup.
+ */
 public class TaskExecutorImpl implements TaskExecutor {
 
     private final ExecutorService threadPool;
