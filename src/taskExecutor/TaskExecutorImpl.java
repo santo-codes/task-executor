@@ -8,7 +8,7 @@ public class TaskExecutorImpl implements TaskExecutor {
 
     private final ExecutorService threadPool;
 
-    private final ConcurrentHashMap<TaskGroup, LinkedBlockingQueue<TaskWrapper<?>>> runnableTasksByTaskGroup;
+    private final ConcurrentHashMap<TaskGroup, ConcurrentLinkedQueue<TaskWrapper<?>>> runnableTasksByTaskGroup;
 
     private final AtomicLong token = new AtomicLong();
 
@@ -21,7 +21,7 @@ public class TaskExecutorImpl implements TaskExecutor {
     public <T> Future<T> submitTask(Task<T> task) {
         var currentToken = token.getAndIncrement();
         var wrapper = new TaskWrapper<>(task, runnableTasksByTaskGroup, currentToken);
-        var tasks = runnableTasksByTaskGroup.computeIfAbsent(task.taskGroup(), taskGroup -> new LinkedBlockingQueue<>());
+        var tasks = runnableTasksByTaskGroup.computeIfAbsent(task.taskGroup(), taskGroup -> new ConcurrentLinkedQueue<>());
         tasks.add(wrapper);
         return threadPool.submit(wrapper);
     }
@@ -33,11 +33,11 @@ public class TaskExecutorImpl implements TaskExecutor {
     public static class TaskWrapper<T> implements Callable<T> {
 
         private final Task<T> task;
-        private final ConcurrentHashMap<TaskGroup, LinkedBlockingQueue<TaskWrapper<?>>> runnableTasksByTaskGroup;
+        private final ConcurrentHashMap<TaskGroup, ConcurrentLinkedQueue<TaskWrapper<?>>> runnableTasksByTaskGroup;
         private final Long token;
         private final CountDownLatch latch = new CountDownLatch(1);
 
-        public TaskWrapper(Task<T> task, ConcurrentHashMap<TaskGroup, LinkedBlockingQueue<TaskWrapper<?>>> runnableTasksByTaskGroup, Long token) {
+        public TaskWrapper(Task<T> task, ConcurrentHashMap<TaskGroup, ConcurrentLinkedQueue<TaskWrapper<?>>> runnableTasksByTaskGroup, Long token) {
             this.task = task;
             this.runnableTasksByTaskGroup = runnableTasksByTaskGroup;
             this.token = token;
